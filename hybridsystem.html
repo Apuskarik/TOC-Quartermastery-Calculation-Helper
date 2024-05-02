@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brotherhood Quarter-Mastery Services - Unified System</title>
+    <style>
+        .item-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item-row button {
+            margin: 0 5px;
+        }
+        .item-row input[type="number"] {
+            width: 50px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Brotherhood Quarter-Mastery Services - Unified System</h1>
+
+<p>Select rank:</p>
+<select id="rank">
+    <option value="Elder">Elder</option>
+    <option value="Sentinel">Sentinel</option>
+    <option value="Head Scribe">Head Scribe</option>
+    <option value="Senior Lancer Captain">Senior Lancer Captain</option>
+    <option value="Star Paladin">Star Paladin</option>
+    <option value="Proctor">Proctor</option>
+    <option value="Lancer Captain">Lancer Captain</option>
+    <option value="Paladin Commander">Paladin Commander</option>
+    <option value="Paladin">Paladin</option>
+    <option value="Knight Paladin">Knight Paladin</option>
+    <option value="Knight">Knight</option>
+    <option value="Knight Initiate">Knight Initiate</option>
+    <option value="Squire">Squire</option>
+    <option value="Senior Scribe">Senior Scribe</option>
+    <option value="Scribe">Scribe</option>
+    <option value="Scribe Initiate">Scribe Initiate</option>
+    <option value="Lancer Knight">Lancer Knight</option>
+    <option value="Lancer">Lancer</option>
+    <option value="Lancer Initiate">Lancer Initiate</option>
+</select>
+
+<p>Enter items and quantities:</p>
+<div id="item-inputs"></div>
+
+<br><br>
+<button onclick="calculate_total_cost()">Calculate</button>
+<button onclick="download_request_log()">Download Request Log</button>
+
+<p id="result"></p>
+
+<script>
+var prices = {
+    "Weapons": {
+        "The Fixer": 35,
+        "Pepper Shaker": 45,
+        "Flamer": 55,
+        "Laser Pistol": 5,
+        "Laser Rifle": 5,
+        "Laser Gatling": 30,
+        "Plasma Pistol": 5,
+        "Plasma Rifle": 5,
+        "Plasma Gatling": 30
+    },
+    "Upgrades": {
+        "The Fixer Upgrade": 4,
+        "Pepper Shaker Upgrade": 5,
+        "Flamer Upgrade": 7,
+        "Laser Pistol Upgrade": 2,
+        "Laser Rifle Upgrade": 3,
+        "Laser Gatling Upgrade": 5,
+        "Plasma Pistol Upgrade": 2,
+        "Plasma Rifle Upgrade": 3,
+        "Plasma Gatling Upgrade": 5
+    },
+    "Armor": {
+        "T-60 Set of Armor": 300,
+        "Jetpack": 50,
+        "Armor Upgrades": 8
+    },
+    "Consumables": {
+        "Food/Water/Med Rations Pack": 40
+    },
+    "Miscellaneous": {
+        "Fusion Cores": 10,
+        "Legendary Roll": 200,
+        "Regular Repair": 2,
+        "Double Durability Repair": 4,
+        "Mutation Serums": 350
+    },
+    "Ammunition": {
+        ".308 Round": 40,
+        ".38 Round": 30,
+        ".44 Round": 45,
+        ".45 Round": 50,
+        ".50 Caliber Ball": 50,
+        ".50 Round": 75,
+        "10mm Round": 30,
+        "Cannonball": 40,
+        "Crossbow Bolt": 75,
+        "Cryo Cell": 50,
+        "Flare": 10,
+        "Fuel": 10,
+        "Fusion Cell": 60,
+        "Gamma Round": 75,
+        "Harpoon": 15,
+        "Mini Nuke": 75,
+        "Missile": 25,
+        "Modified Bowling Ball": 50,
+        "Paddle Ball String": 10,
+        "Plasma Core": 75,
+        "Plasma Cartridge": 75
+    },
+    "Junk": {
+        "Gold scrap": 120,
+        "Lead scrap": 140,
+        "Loose screws": 105,
+        "Loose springs": 105,
+        "Nuclear waste": 80,
+        "Raw asbestos": 60,
+        "Raw fertilizer": 125,
+        "Raw leather": 90,
+        "Raw rubber": 90,
+        "Molded plastic": 40,
+        "Raw cloth": 50,
+        "Loose gears": 80,
+        "Aluminum scrap": 60,
+        "Ballistic fiber scrap": 120,
+        "Black titanium scrap": 80,
+        "Bone shards": 54,
+        "Ceramic scrap": 40,
+        "Coal": 50,
+        "Concrete scrap": 54,
+        "Copper scrap": 150,
+        "Cork scrap": 60,
+        "Crystal shards": 70,
+        "Excess adhesive": 90,
+        "Fiber optics bundle": 80,
+        "Fiberglass spool": 60,
+        "Glass shards": 40,
+        "Steel scrap": 80,
+        "Ultracite scrap": 175,
+        "Vault steel": 175,
+        "Waste antiseptic": 90,
+        "Waste oil": 72,
+        "Waste acid": 105,
+        "Wood scraps": 50
+    },
+    "Flux": {
+        "Stable cobalt flux": 150,
+        "Stable crimson flux": 150,
+        "Stable fluorescent flux": 150,
+        "Stable violet flux": 150,
+        "Stable yellowcake flux": 150
+    }
+};
+
+var discounts = {
+    "Elder": 0.3, "Sentinel": 0.3, "Head Scribe": 0.3, "Senior Lancer Captain": 0.3,
+    "Star Paladin": 0.2, "Proctor": 0.2, "Lancer Captain": 0.2, "Paladin Commander": 0.2,
+    "Paladin": 0.1, "Knight Paladin": 0.1, "Knight": 0.1, "Knight Initiate": 0.1, "Squire": 0.1,
+    "Senior Scribe": 0.1, "Scribe": 0.1, "Scribe Initiate": 0.1,
+    "Lancer Knight": 0.1, "Lancer": 0.1, "Lancer Initiate": 0.1
+};
+
+function calculate_total_cost() {
+    var total_cost = 0;
+    var rank = document.getElementById('rank').value;
+    var discount = discounts[rank] || 0;
+
+    try {
+        var items = document.querySelectorAll('.item-input');
+        items.forEach(item => {
+            var category = item.dataset.category;
+            var itemName = item.dataset.item;
+            var quantity = parseInt(item.value);
+            if (prices[category].hasOwnProperty(itemName)) {
+                total_cost += prices[category][itemName] * quantity;
+            }
+        });
+        total_cost = total_cost * (1 - discount); // Apply discount
+        document.getElementById('result').innerText = "Total cost: " + total_cost.toFixed(2) + " caps";
+    } catch (e) {
+        document.getElementById('result').innerText = "Error: " + e;
+    }
+}
+
+function updateQuantity(itemName, operation) {
+    var itemInput = document.getElementById(itemName);
+    var quantity = parseInt(itemInput.value) || 0;
+    if (operation === 'increase') {
+        itemInput.value = quantity + 1;
+    } else if (operation === 'decrease' && quantity > 0) {
+        itemInput.value = quantity - 1;
+    }
+}
+
+function download_request_log() {
+    var log = '';
+    var items = document.querySelectorAll('.item-input');
+
+    // Iterate over items to get the quantities and names
+    items.forEach(item => {
+        var itemName = item.dataset.item;
+        var category = item.dataset.category;
+        var quantity = parseInt(item.value) || 0;
+
+        if (quantity > 0) {
+            log += `${category}: ${itemName} - Quantity: ${quantity}\n`;
+        }
+    });
+
+    if (log === '') {
+        alert("No items requested.");
+        return;
+    }
+
+    // Create a blob and use a link to download it
+    var blob = new Blob([log], { type: 'text/plain' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'request_log.txt';
+    link.click();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    var itemInputs = document.getElementById('item-inputs');
+    for (var category in prices) {
+        var categoryHeading = document.createElement('h2');
+        categoryHeading.innerText = category;
+        itemInputs.appendChild(categoryHeading);
+        for (var itemName in prices[category]) {
+            var itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+            var increaseButton = document.createElement('button');
+            increaseButton.innerText = '+';
+            increaseButton.onclick = (function(name) {
+                return function() {
+                    updateQuantity(name, 'increase');
+                }
+            })(itemName);
+            var decreaseButton = document.createElement('button');
+            decreaseButton.innerText = '-';
+            decreaseButton.onclick = (function(name) {
+                return function() {
+                    updateQuantity(name, 'decrease');
+                }
+            })(itemName);
+            var itemInput = document.createElement('input');
+            itemInput.type = 'number';
+            itemInput.className = 'item-input';
+            itemInput.id = itemName;
+            itemInput.value = '0';
+            itemInput.dataset.item = itemName;
+            itemInput.dataset.category = category;
+            var itemLabel = document.createElement('span');
+            itemLabel.innerText = itemName;
+            itemRow.appendChild(increaseButton);
+            itemRow.appendChild(itemInput);
+            itemRow.appendChild(decreaseButton);
+            itemRow.appendChild(itemLabel);
+            itemInputs.appendChild(itemRow);
+        }
+    }
+});
+</script>
+</body>
+</html>
